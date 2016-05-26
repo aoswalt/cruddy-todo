@@ -9,3 +9,7 @@ h1 {
 .completed {
   text-decoration: line-through;
 }
+
+.app {
+  display: none;
+}

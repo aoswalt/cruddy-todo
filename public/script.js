@@ -13,7 +13,7 @@ $(() => {
   });
 
   //NOTE(adam): CREATE: form submit event to POST data to firebase
-  $("form").submit((ev) => {
+  $(".add form").submit((ev) => {
     ev.preventDefault();
     const $formInput =$('input[type="text"]');
     const inputData = {task: $formInput.val()};
