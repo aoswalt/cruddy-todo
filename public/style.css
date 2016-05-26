@@ -1,3 +1,11 @@
 h1 {
   color: tomato;
 }
+
+.complete {
+  width: 11rem;
+}
+
+.completed {
+  text-decoration: line-through;
+}

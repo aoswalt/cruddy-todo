@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 "use strict";
 
-//TODO(adam): handle completed tasks
-
 $(() => {
   const API_URL = "https://cruddy-todo.firebaseio.com/task";
 
@@ -38,16 +36,32 @@ $(() => {
     });
   });
 
+  //NOTE(adam): UPDATE: click event on complete to send PUT/PATCH to firebase
+  $("tbody").on("click", ".complete", (e) => {
+    const $row = $(e.target).closest("tr");
+    const id = $row.data("id");
+    const $taskText = $row.children(".task-text");
+    const isNowComplete = !$taskText.hasClass("completed");
+    $.ajax({
+      url: `${API_URL}/${id}.json`,
+      type: "PATCH",
+      dataType: "json",
+      data: JSON.stringify({ complete: isNowComplete })
+    }).done(function() {
+      $taskText.toggleClass("completed", isNowComplete);
+      $row.find(".complete").html(`${isNowComplete ? "Uncomplete" : "Complete"}`);
+    });
+  });
+
 });
 
-//TODO(adam): UPDATE: click event on complete to send PUT/PATCH to firebase
 
 //NOTE(adam): id as second means it would still show up just not have id
 function addItemToTable(item, id) {
   const row = `<tr data-id="${id}">
-    <td>${item.task}</td>
+    <td class="task-text ${item.complete ? "completed" : ""}">${item.task}</td>
     <td>
-      <button class="btn btn-success">Complete</button>
+      <button class="complete btn btn-success">${item.complete ? "Uncomplete" : "Complete"}</button>
       <button class="delete btn btn-danger">Delete</button>
     </td>
   </tr>`;
