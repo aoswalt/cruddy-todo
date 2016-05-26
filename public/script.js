@@ -13,11 +13,16 @@ $(() => {
     }
   });
 
-  //TODO(adam): CREATE: form submit event to POST data to firebase
-  $("form").submit(() => {
-    //TODO(adam): grab the form text
-    $.post(`${API_URL}.json`, JSON.stringify({task: "I was posted"}));
-    //TODO(adam): make this not refresh the page
+  //NOTE(adam): CREATE: form submit event to POST data to firebase
+  $("form").submit((ev) => {
+    ev.preventDefault();
+    const $formInput =$('input[type="text"]');
+    const inputData = {task: $formInput.val()};
+    $.post(`${API_URL}.json`, JSON.stringify(inputData))
+      .done((data) => {
+        addItemToTable(inputData, data.name);
+        $formInput.val("");
+      });
   });
 
   //NOTE(adam): DELETE: click event on delete to send DELETE to firebase
