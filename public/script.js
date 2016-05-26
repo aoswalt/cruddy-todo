@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+/* global firebase:false */
 "use strict";
 
 $(() => {
@@ -51,6 +52,13 @@ $(() => {
       $taskText.toggleClass("completed", isNowComplete);
       $row.find(".complete").html(`${isNowComplete ? "Uncomplete" : "Complete"}`);
     });
+  });
+
+  firebase.initializeApp({
+    apiKey: "AIzaSyCUv6C0cre1ObRwFxe_F0i9rIe9bcgYPV4",
+    authDomain: "cruddy-todo.firebaseapp.com",
+    databaseURL: "https://cruddy-todo.firebaseio.com",
+    storageBucket: "cruddy-todo.appspot.com"
   });
 
 });
