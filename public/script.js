@@ -101,6 +101,8 @@ $(() => {
     e.preventDefault();
   });
 
+  $(".logout").click(() => firebase.auth().signOut());
+
   firebase.auth().onAuthStateChanged(user => {
     if(user) {
       //NOTE(adam): logged in
@@ -118,6 +120,7 @@ $(() => {
       //NOTE(adam): logged out
       $(".app").hide();
       $(".login").show();
+      $("tbody").empty();
     }
   });
 
