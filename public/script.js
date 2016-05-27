@@ -2,22 +2,26 @@
 /* global firebase:false */
 "use strict";
 
+
 $(() => {
   const API_URL = "https://cruddy-todo.firebaseio.com/task";
+  let token = null;
 
-  //NOTE(adam): READ:   GET data from firebase and display in table
-  $.get(`${API_URL}.json`).done((data) => {
-    if(data) {
-      Object.keys(data).forEach((id) => addItemToTable(data[id], id));
-    }
-  });
+  const getTasks = () => {
+    //NOTE(adam): READ:   GET data from firebase and display in table
+    $.get(`${API_URL}.json?token=${token}`).done((data) => {
+      if(data) {
+        Object.keys(data).forEach((id) => addItemToTable(data[id], id));
+      }
+    });
+  };
 
   //NOTE(adam): CREATE: form submit event to POST data to firebase
   $(".add form").submit((ev) => {
     ev.preventDefault();
     const $formInput =$('input[type="text"]');
     const inputData = {task: $formInput.val()};
-    $.post(`${API_URL}.json`, JSON.stringify(inputData))
+    $.post(`${API_URL}.json?token=${token}`, JSON.stringify(inputData))
       .done((data) => {
         addItemToTable(inputData, data.name);
         $formInput.val("");
@@ -30,7 +34,7 @@ $(() => {
     const $row = $(e.target).closest("tr");
     const id = $row.data("id");
     $.ajax({
-      url: `${API_URL}/${id}.json`,
+      url: `${API_URL}/${id}.json?token=${token}`,
       type: "DELETE"
     }).done(function() {
       $row.remove();
@@ -44,7 +48,7 @@ $(() => {
     const $taskText = $row.children(".task-text");
     const isNowComplete = !$taskText.hasClass("completed");
     $.ajax({
-      url: `${API_URL}/${id}.json`,
+      url: `${API_URL}/${id}.json?token=${token}`,
       type: "PATCH",
       dataType: "json",
       data: JSON.stringify({ complete: isNowComplete })
@@ -54,11 +58,63 @@ $(() => {
     });
   });
 
+
   firebase.initializeApp({
     apiKey: "AIzaSyCUv6C0cre1ObRwFxe_F0i9rIe9bcgYPV4",
     authDomain: "cruddy-todo.firebaseapp.com",
     databaseURL: "https://cruddy-todo.firebaseio.com",
     storageBucket: "cruddy-todo.appspot.com"
+  });
+
+  //NOTE(adam): both return promise-like objects
+  const login = (email, password) => (
+    firebase.auth().signInWithEmailAndPassword(email, password)
+  );
+
+  const register = (email, password) => (
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+  );
+
+  $(".login form").submit((e) => {
+    const form = $(e.target);
+    const email = form.find('input[type="text"]').val();
+    const password = form.find('input[type="password"]').val();
+
+    login(email, password)
+      .then(console.log)
+      .catch(console.err);
+
+    e.preventDefault();
+  });
+
+  $('input[value="Register"]').click((e) => {
+    const form = $(e.target).closest("form");
+    const email = form.find('input[type="text"]').val();
+    const password = form.find('input[type="password"]').val();
+
+    register(email, password)
+      .then(() => login(email, password))
+      .then(console.log)
+      .catch(console.err);
+
+    e.preventDefault();
+  });
+
+  firebase.auth().onAuthStateChanged(user => {
+    if(user) {
+      //NOTE(adam): logged in
+      user.getToken()
+        .then(t => token = t)
+        .then(() => {
+          $(".login").hide();
+          $(".app").show();
+          getTasks();
+        });
+    } else {
+      //NOTE(adam): logged out
+      $(".app").hide();
+      $(".login").show();
+    }
   });
 
 });
