@@ -4,12 +4,13 @@
 
 
 $(() => {
-  const API_URL = "https://cruddy-todo.firebaseio.com/task";
+  const API_URL = "https://cruddy-todo.firebaseio.com";
   let token = null;
+  let userId = null;
 
   const getTasks = () => {
     //NOTE(adam): READ:   GET data from firebase and display in table
-    $.get(`${API_URL}.json?token=${token}`).done((data) => {
+    $.get(`${API_URL}/${userId}/task/.json?token=${token}`).done((data) => {
       if(data) {
         Object.keys(data).forEach((id) => addItemToTable(data[id], id));
       }
@@ -19,9 +20,9 @@ $(() => {
   //NOTE(adam): CREATE: form submit event to POST data to firebase
   $(".add form").submit((ev) => {
     ev.preventDefault();
-    const $formInput =$('input[type="text"]');
+    const $formInput =$(".task-input");
     const inputData = {task: $formInput.val()};
-    $.post(`${API_URL}.json?token=${token}`, JSON.stringify(inputData))
+    $.post(`${API_URL}/${userId}/task/.json?token=${token}`, JSON.stringify(inputData))
       .done((data) => {
         addItemToTable(inputData, data.name);
         $formInput.val("");
@@ -32,9 +33,9 @@ $(() => {
   //NOTE(adam): dynamic click event on delete buttons
   $("tbody").on("click", ".delete", (e) => {
     const $row = $(e.target).closest("tr");
-    const id = $row.data("id");
+    const taskId = $row.data("id");
     $.ajax({
-      url: `${API_URL}/${id}.json?token=${token}`,
+      url: `${API_URL}/${userId}/task/${taskId}.json?token=${token}`,
       type: "DELETE"
     }).done(function() {
       $row.remove();
@@ -48,7 +49,7 @@ $(() => {
     const $taskText = $row.children(".task-text");
     const isNowComplete = !$taskText.hasClass("completed");
     $.ajax({
-      url: `${API_URL}/${id}.json?token=${token}`,
+      url: `${API_URL}/${userId}/task/${id}.json?token=${token}`,
       type: "PATCH",
       dataType: "json",
       data: JSON.stringify({ complete: isNowComplete })
@@ -104,6 +105,7 @@ $(() => {
     if(user) {
       //NOTE(adam): logged in
       $(".logged_in_user").html(user.email);
+      userId = user.uid;
 
       user.getToken()
         .then(t => token = t)
