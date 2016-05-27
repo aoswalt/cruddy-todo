@@ -103,6 +103,8 @@ $(() => {
   firebase.auth().onAuthStateChanged(user => {
     if(user) {
       //NOTE(adam): logged in
+      $(".logged_in_user").html(user.email);
+
       user.getToken()
         .then(t => token = t)
         .then(() => {
